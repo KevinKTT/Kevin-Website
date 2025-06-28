@@ -152,6 +152,16 @@
       font-size: 0.9rem;
       color: var(--footer);
     }
+
+    /* Search highlight styles */
+    .search-highlight {
+      background-color: #ffeb3b;
+      color: #000;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: bold;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 
@@ -161,7 +171,7 @@
     <p>Cybersecurity Engineer | AI Enthusiast | HTB Pro Hacker</p>
     <nav>
       <a href="resume.pdf" target="_blank">Resume</a>
-      <a href="#linkedin">LinkedIn</a>
+      <a href="https://www.linkedin.com/in/KevinTroyThompson/" target="_blank">LinkedIn</a>
       <a href="#htb">HTB Writeups</a>
       <a href="#ctf">CTF Tools</a>
     </nav>
@@ -179,7 +189,7 @@
   <section id="htb">
     <h2>Hack The Box Writeups</h2>
     <div class="grid">
-      <div class="card">lame.htb</div>
+      <div class="card" onclick="window.location.href='lame.htb.html'">lame.htb</div>
       <div class="card">forest.htb</div>
       <div class="card">sizzle.htb</div>
       <div class="card">sauna.htb</div>
@@ -234,6 +244,128 @@
       threshold: 0.1
     });
     sections.forEach(section => observer.observe(section));
+
+    // Search functionality
+    function performSearch() {
+      const searchInput = document.getElementById('searchBox');
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      
+      // Clear previous highlights
+      clearHighlights();
+      
+      if (searchTerm === '') {
+        return;
+      }
+      
+      // Get all text content elements to search through
+      const searchableElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, span, div');
+      let foundResults = 0;
+      
+      searchableElements.forEach(element => {
+        const text = element.textContent.toLowerCase();
+        if (text.includes(searchTerm) && !element.classList.contains('search-highlight')) {
+          highlightText(element, searchTerm);
+          foundResults++;
+        }
+      });
+      
+      // Show search results feedback
+      showSearchFeedback(foundResults, searchTerm);
+      
+      // Scroll to first result if found
+      if (foundResults > 0) {
+        const firstHighlight = document.querySelector('.search-highlight');
+        if (firstHighlight) {
+          firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+    
+    function highlightText(element, searchTerm) {
+      const text = element.innerHTML;
+      const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
+      const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
+      element.innerHTML = highlightedText;
+    }
+    
+    function clearHighlights() {
+      const highlights = document.querySelectorAll('.search-highlight');
+      highlights.forEach(highlight => {
+        const parent = highlight.parentNode;
+        parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+        parent.normalize();
+      });
+      
+      // Remove search feedback
+      const feedback = document.getElementById('searchFeedback');
+      if (feedback) {
+        feedback.remove();
+      }
+    }
+    
+    function showSearchFeedback(count, term) {
+      // Remove existing feedback
+      const existingFeedback = document.getElementById('searchFeedback');
+      if (existingFeedback) {
+        existingFeedback.remove();
+      }
+      
+      // Create new feedback
+      const feedback = document.createElement('div');
+      feedback.id = 'searchFeedback';
+      feedback.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: #333;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        z-index: 1000;
+        font-size: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      `;
+      
+      if (count > 0) {
+        feedback.textContent = `Found ${count} result${count !== 1 ? 's' : ''} for "${term}"`;
+        feedback.style.background = '#28a745';
+      } else {
+        feedback.textContent = `No results found for "${term}"`;
+        feedback.style.background = '#dc3545';
+      }
+      
+      document.body.appendChild(feedback);
+      
+      // Auto-remove feedback after 3 seconds
+      setTimeout(() => {
+        if (feedback.parentNode) {
+          feedback.remove();
+        }
+      }, 3000);
+    }
+    
+    function escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    // Add event listeners for search
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchBox');
+      
+      // Search on Enter key
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+      
+      // Clear highlights when input is cleared
+      searchInput.addEventListener('input', function() {
+        if (this.value.trim() === '') {
+          clearHighlights();
+        }
+      });
+    });
   </script>
 </body>
 
