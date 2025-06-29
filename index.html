@@ -187,6 +187,7 @@
       <a href="https://www.linkedin.com/in/KevinTroyThompson/" target="_blank">LinkedIn</a>
       <a href="#htb">HTB Writeups</a>
       <a href="#ctf">CTF Tools</a>
+      <a href="#ai">AI Arsenal</a>
     </nav>
     <div class="search">
       <input type="text" id="searchBox" placeholder="Search content...">
@@ -230,6 +231,14 @@
     </div>
   </section>
 
+  <section id="ai">
+    <h2>AI Arsenal</h2>
+    <div class="grid">
+      <div class="card" onclick="window.open('https://github.com/danielmiessler/fabric', '_blank')">Fabric</div>
+      <div class="card" onclick="window.open('https://github.com/danielmiessler/fabric/tree/main/patterns', '_blank')">Patterns</div>
+    </div>
+  </section>
+
   <div class="footer">
     &copy; 2025 Kevin Troy Thompson, CISSP | <a href="https://www.linkedin.com/in/KevinTroyThompson" style="color:var(--primary)">LinkedIn</a> | <a href="https://www.ktt.pw" style="color:var(--primary)">www.ktt.pw</a>
   </div>
@@ -245,12 +254,14 @@
       localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
     }
 
-    // Scroll reveal
+    // Enhanced scroll reveal with staggered animations
     const sections = document.querySelectorAll('section');
     const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
+      entries.forEach((entry, index) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('revealed');
+          setTimeout(() => {
+            entry.target.classList.add('revealed');
+          }, index * 100); // Stagger the animations
         }
       });
     }, {
@@ -258,7 +269,154 @@
     });
     sections.forEach(section => observer.observe(section));
 
-    // Search functionality
+    // Animated typing effect for header
+    function typeWriter(element, text, speed = 100) {
+      let i = 0;
+      element.innerHTML = '';
+      function type() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
+
+    // Particle background effect
+    function createParticles() {
+      const particleContainer = document.createElement('div');
+      particleContainer.id = 'particles';
+      particleContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        overflow: hidden;
+      `;
+      document.body.appendChild(particleContainer);
+
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: var(--primary);
+          border-radius: 50%;
+          opacity: 0.3;
+          animation: float ${Math.random() * 10 + 5}s infinite linear;
+        `;
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 10 + 's';
+        particleContainer.appendChild(particle);
+      }
+
+      // Add CSS animation for particles
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+          50% { opacity: 0.6; }
+          100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Enhanced card hover effects with sound
+    function enhanceCards() {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        // Add ripple effect on click
+        card.addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = e.clientX - rect.left - size / 2;
+          const y = e.clientY - rect.top - size / 2;
+          
+          ripple.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+          `;
+          
+          this.style.position = 'relative';
+          this.style.overflow = 'hidden';
+          this.appendChild(ripple);
+          
+          setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Add floating animation on hover
+        card.addEventListener('mouseenter', function() {
+          this.style.animation = 'cardFloat 2s ease-in-out infinite';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+          this.style.animation = '';
+        });
+      });
+
+      // Add CSS for card animations
+      const cardStyle = document.createElement('style');
+      cardStyle.textContent = `
+        @keyframes ripple {
+          to { transform: scale(2); opacity: 0; }
+        }
+        @keyframes cardFloat {
+          0%, 100% { transform: translateY(-5px) rotateY(0deg); }
+          50% { transform: translateY(-8px) rotateY(5deg); }
+        }
+      `;
+      document.head.appendChild(cardStyle);
+    }
+
+    // Interactive cursor trail
+    function createCursorTrail() {
+      const trail = [];
+      const trailLength = 10;
+      
+      for (let i = 0; i < trailLength; i++) {
+        const dot = document.createElement('div');
+        dot.style.cssText = `
+          position: fixed;
+          width: 4px;
+          height: 4px;
+          background: var(--primary);
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 9999;
+          opacity: ${1 - i / trailLength};
+          transition: all 0.1s ease;
+        `;
+        document.body.appendChild(dot);
+        trail.push(dot);
+      }
+
+      document.addEventListener('mousemove', (e) => {
+        trail.forEach((dot, index) => {
+          setTimeout(() => {
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+          }, index * 20);
+        });
+      });
+    }
+
+    // Search functionality with enhanced features
     function performSearch() {
       const searchInput = document.getElementById('searchBox');
       const searchTerm = searchInput.value.toLowerCase().trim();
@@ -378,6 +536,7 @@
         z-index: 1000;
         font-size: 14px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease-out;
       `;
       
       if (count > 0) {
@@ -393,7 +552,8 @@
       // Auto-remove feedback after 3 seconds
       setTimeout(() => {
         if (feedback.parentNode) {
-          feedback.remove();
+          feedback.style.animation = 'slideOut 0.3s ease-in';
+          setTimeout(() => feedback.remove(), 300);
         }
       }, 3000);
     }
@@ -401,6 +561,20 @@
     function escapeRegex(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
+
+    // Add slide animations for feedback
+    const feedbackStyle = document.createElement('style');
+    feedbackStyle.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(feedbackStyle);
     
     // Add event listeners for search
     document.addEventListener('DOMContentLoaded', function() {
@@ -419,6 +593,35 @@
           clearHighlights();
         }
       });
+
+      // Initialize all enhancements
+      setTimeout(() => {
+        const headerTitle = document.querySelector('header h1');
+        const originalText = headerTitle.textContent;
+        typeWriter(headerTitle, originalText, 150);
+      }, 500);
+
+      createParticles();
+      enhanceCards();
+      createCursorTrail();
+
+      // Add smooth scrolling for navigation links
+      document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      // Add loading animation
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 1s ease-in';
+      setTimeout(() => {
+        document.body.style.opacity = '1';
+      }, 100);
     });
   </script>
 </body>

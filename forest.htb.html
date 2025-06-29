@@ -169,6 +169,570 @@ aad3b435b51404eeaad3b435b51404ee:32693b11e6aa90eb43d32c72a07ceea6</code></pre>
         ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
         : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
     }
+
+    // Enhanced features for forest.htb writeup
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animated forest-themed background
+      function createForestParticles() {
+        const particleContainer = document.createElement('div');
+        particleContainer.id = 'forest-particles';
+        particleContainer.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: -1;
+          overflow: hidden;
+        `;
+        document.body.appendChild(particleContainer);
+
+        // Create floating leaves
+        for (let i = 0; i < 30; i++) {
+          const leaf = document.createElement('div');
+          leaf.innerHTML = '🍃';
+          leaf.style.cssText = `
+            position: absolute;
+            font-size: ${Math.random() * 20 + 10}px;
+            opacity: 0.3;
+            animation: forestFloat ${Math.random() * 15 + 10}s infinite linear;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            animation-delay: ${Math.random() * 10}s;
+          `;
+          particleContainer.appendChild(leaf);
+        }
+
+        // Add forest animation CSS
+        const forestStyle = document.createElement('style');
+        forestStyle.textContent = `
+          @keyframes forestFloat {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            25% { opacity: 0.6; }
+            50% { transform: translateY(-50px) rotate(180deg); opacity: 0.4; }
+            75% { opacity: 0.2; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+          }
+        `;
+        document.head.appendChild(forestStyle);
+      }
+
+      // Smooth scroll reveal with forest theme
+      const elements = document.querySelectorAll('h1, h2, p, pre, img, ul');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0) scale(1)';
+            }, index * 50);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      elements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(40px) scale(0.95)';
+        el.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        observer.observe(el);
+      });
+
+      // Enhanced code blocks with forest theme
+      const codeBlocks = document.querySelectorAll('pre code');
+      codeBlocks.forEach((block, index) => {
+        const pre = block.parentElement;
+        pre.style.position = 'relative';
+        pre.style.border = '1px solid rgba(56, 178, 172, 0.3)';
+        
+        // Add copy button with forest theme
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = '🌲 Copy';
+        copyBtn.style.cssText = `
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: var(--primary);
+          color: white;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 12px;
+          opacity: 0;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(56, 178, 172, 0.3);
+        `;
+        
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(block.textContent).then(() => {
+            copyBtn.innerHTML = '🌿 Copied!';
+            copyBtn.style.background = '#10b981';
+            setTimeout(() => {
+              copyBtn.innerHTML = '🌲 Copy';
+              copyBtn.style.background = 'var(--primary)';
+            }, 2000);
+          });
+        });
+        
+        pre.appendChild(copyBtn);
+        
+        // Enhanced hover effects
+        pre.addEventListener('mouseenter', function() {
+          copyBtn.style.opacity = '1';
+          this.style.transform = 'translateY(-2px)';
+          this.style.boxShadow = '0 8px 25px rgba(56, 178, 172, 0.2)';
+          this.style.borderColor = 'var(--primary)';
+        });
+        
+        pre.addEventListener('mouseleave', function() {
+          copyBtn.style.opacity = '0';
+          this.style.transform = 'translateY(0)';
+          this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+          this.style.borderColor = 'rgba(56, 178, 172, 0.3)';
+        });
+
+        // Add step numbering for commands
+        const stepNumber = document.createElement('div');
+        stepNumber.textContent = `Step ${index + 1}`;
+        stepNumber.style.cssText = `
+          position: absolute;
+          top: -12px;
+          left: 15px;
+          background: var(--primary);
+          color: white;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: bold;
+        `;
+        pre.appendChild(stepNumber);
+      });
+
+      // Interactive image gallery with forest theme
+      const images = document.querySelectorAll('.screenshot');
+      images.forEach((img, index) => {
+        img.style.opacity = '0';
+        img.style.transition = 'all 0.6s ease';
+        img.style.border = '2px solid transparent';
+        
+        img.addEventListener('load', function() {
+          setTimeout(() => {
+            this.style.opacity = '1';
+          }, index * 200);
+        });
+        
+        // Enhanced click to zoom with forest theme
+        img.addEventListener('click', function() {
+          const overlay = document.createElement('div');
+          overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,50,30,0.9));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            cursor: pointer;
+            animation: forestFadeIn 0.4s ease;
+          `;
+          
+          const zoomedImg = this.cloneNode();
+          zoomedImg.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 12px;
+            box-shadow: 0 25px 80px rgba(56, 178, 172, 0.3);
+            animation: forestZoomIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 3px solid var(--primary);
+          `;
+          
+          // Add image info
+          const imageInfo = document.createElement('div');
+          imageInfo.style.cssText = `
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+          `;
+          imageInfo.textContent = `Image ${index + 1} - Click anywhere to close`;
+          
+          overlay.appendChild(zoomedImg);
+          overlay.appendChild(imageInfo);
+          document.body.appendChild(overlay);
+          
+          overlay.addEventListener('click', () => {
+            overlay.style.animation = 'forestFadeOut 0.3s ease';
+            setTimeout(() => overlay.remove(), 300);
+          });
+        });
+        
+        // Hover effects with forest theme
+        img.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.03) rotate(1deg)';
+          this.style.borderColor = 'var(--primary)';
+          this.style.cursor = 'pointer';
+          this.style.boxShadow = '0 15px 35px rgba(56, 178, 172, 0.3)';
+        });
+        
+        img.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1) rotate(0deg)';
+          this.style.borderColor = 'transparent';
+          this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+        });
+      });
+
+      // Progress indicator with forest theme
+      const progressBar = document.createElement('div');
+      progressBar.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), #10b981, #34d399);
+        z-index: 9999;
+        transition: width 0.3s ease;
+        box-shadow: 0 2px 10px rgba(56, 178, 172, 0.5);
+      `;
+      document.body.appendChild(progressBar);
+      
+      window.addEventListener('scroll', () => {
+        const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        progressBar.style.width = scrolled + '%';
+      });
+
+      // Interactive cursor trail (like index.html)
+      function createCursorTrail() {
+        const trail = [];
+        const trailLength = 8;
+        
+        for (let i = 0; i < trailLength; i++) {
+          const dot = document.createElement('div');
+          dot.style.cssText = `
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: ${1 - i / trailLength};
+            transition: all 0.1s ease;
+          `;
+          document.body.appendChild(dot);
+          trail.push(dot);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+          trail.forEach((dot, index) => {
+            setTimeout(() => {
+              dot.style.left = e.clientX + 'px';
+              dot.style.top = e.clientY + 'px';
+            }, index * 20);
+          });
+        });
+      }
+
+      // Compact collapsible table of contents (forest theme)
+      const headings = document.querySelectorAll('h1, h2');
+      if (headings.length > 1) {
+        const tocContainer = document.createElement('div');
+        tocContainer.style.cssText = `
+          position: fixed;
+          left: 20px;
+          top: 20px;
+          z-index: 1000;
+          transition: all 0.3s ease;
+        `;
+        
+        // TOC Toggle Button (forest themed)
+        const tocToggle = document.createElement('button');
+        tocToggle.innerHTML = '🌲';
+        tocToggle.style.cssText = `
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: var(--primary);
+          color: white;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+          box-shadow: 0 4px 12px rgba(56, 178, 172, 0.3);
+          transition: all 0.3s ease;
+        `;
+        
+        // TOC Content (initially hidden)
+        const tocContent = document.createElement('div');
+        tocContent.style.cssText = `
+          position: absolute;
+          top: 50px;
+          left: 0;
+          background: linear-gradient(135deg, var(--bg), rgba(56, 178, 172, 0.1));
+          border: 1px solid var(--primary);
+          border-radius: 8px;
+          padding: 12px;
+          min-width: 180px;
+          max-width: 220px;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-10px);
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 8px 25px rgba(56, 178, 172, 0.3);
+        `;
+        
+        const tocTitle = document.createElement('h4');
+        tocTitle.innerHTML = '🌲 Contents';
+        tocTitle.style.cssText = `
+          margin: 0 0 8px 0;
+          color: var(--primary);
+          font-size: 13px;
+          text-align: center;
+          border-bottom: 1px solid var(--primary);
+          padding-bottom: 4px;
+        `;
+        tocContent.appendChild(tocTitle);
+        
+        headings.forEach((heading, index) => {
+          const link = document.createElement('a');
+          link.textContent = heading.textContent.length > 25 ? 
+            heading.textContent.substring(0, 25) + '...' : 
+            heading.textContent;
+          link.href = '#';
+          link.title = heading.textContent; // Full text on hover
+          link.style.cssText = `
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            padding: 4px 0;
+            font-size: 11px;
+            border-left: 2px solid transparent;
+            padding-left: ${heading.tagName === 'H2' ? '12px' : '4px'};
+            transition: all 0.3s ease;
+            border-radius: 3px;
+            margin: 1px 0;
+          `;
+          
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Highlight the target heading temporarily
+            const originalColor = heading.style.color;
+            heading.style.color = 'var(--primary)';
+            heading.style.textShadow = '0 0 10px rgba(56, 178, 172, 0.5)';
+            setTimeout(() => {
+              heading.style.color = originalColor;
+              heading.style.textShadow = 'none';
+            }, 2000);
+            
+            // Auto-hide TOC after selection
+            tocContent.style.opacity = '0';
+            tocContent.style.visibility = 'hidden';
+            tocContent.style.transform = 'translateY(-10px)';
+            tocToggle.innerHTML = '🌲';
+            tocToggle.style.background = 'var(--primary)';
+          });
+          
+          link.addEventListener('mouseenter', function() {
+            this.style.borderLeftColor = 'var(--primary)';
+            this.style.color = 'var(--primary)';
+            this.style.backgroundColor = 'rgba(56, 178, 172, 0.1)';
+            this.style.paddingLeft = (heading.tagName === 'H2' ? '15px' : '7px');
+          });
+          
+          link.addEventListener('mouseleave', function() {
+            this.style.borderLeftColor = 'transparent';
+            this.style.color = 'var(--text)';
+            this.style.backgroundColor = 'transparent';
+            this.style.paddingLeft = (heading.tagName === 'H2' ? '12px' : '4px');
+          });
+          
+          tocContent.appendChild(link);
+        });
+        
+        // Toggle functionality
+        let isOpen = false;
+        tocToggle.addEventListener('click', () => {
+          isOpen = !isOpen;
+          if (isOpen) {
+            tocContent.style.opacity = '1';
+            tocContent.style.visibility = 'visible';
+            tocContent.style.transform = 'translateY(0)';
+            tocToggle.innerHTML = '✕';
+            tocToggle.style.background = '#ff6b6b';
+          } else {
+            tocContent.style.opacity = '0';
+            tocContent.style.visibility = 'hidden';
+            tocContent.style.transform = 'translateY(-10px)';
+            tocToggle.innerHTML = '🌲';
+            tocToggle.style.background = 'var(--primary)';
+          }
+        });
+        
+        // Hover effects for toggle button
+        tocToggle.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.1) rotate(15deg)';
+          this.style.boxShadow = '0 6px 20px rgba(56, 178, 172, 0.4)';
+        });
+        
+        tocToggle.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1) rotate(0deg)';
+          this.style.boxShadow = '0 4px 12px rgba(56, 178, 172, 0.3)';
+        });
+        
+        // Close TOC when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!tocContainer.contains(e.target) && isOpen) {
+            isOpen = false;
+            tocContent.style.opacity = '0';
+            tocContent.style.visibility = 'hidden';
+            tocContent.style.transform = 'translateY(-10px)';
+            tocToggle.innerHTML = '🌲';
+            tocToggle.style.background = 'var(--primary)';
+          }
+        });
+        
+        tocContainer.appendChild(tocToggle);
+        tocContainer.appendChild(tocContent);
+        document.body.appendChild(tocContainer);
+        
+        // Hide TOC on mobile
+        if (window.innerWidth < 768) {
+          tocContainer.style.display = 'none';
+        }
+      }
+
+      // Add forest-themed CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes forestFadeIn {
+          from { opacity: 0; backdrop-filter: blur(0px); }
+          to { opacity: 1; backdrop-filter: blur(5px); }
+        }
+        @keyframes forestFadeOut {
+          from { opacity: 1; backdrop-filter: blur(5px); }
+          to { opacity: 0; backdrop-filter: blur(0px); }
+        }
+        @keyframes forestZoomIn {
+          from { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+          to { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .back a {
+          transition: all 0.3s ease;
+          padding: 10px 18px;
+          border-radius: 8px;
+          background: linear-gradient(135deg, rgba(56, 178, 172, 0.1), rgba(56, 178, 172, 0.2));
+          border: 1px solid rgba(56, 178, 172, 0.3);
+        }
+        .back a:hover {
+          background: linear-gradient(135deg, var(--primary), #10b981);
+          color: white;
+          transform: translateX(-8px) scale(1.05);
+          box-shadow: 0 5px 15px rgba(56, 178, 172, 0.4);
+        }
+        h1 {
+          text-shadow: 0 0 20px rgba(56, 178, 172, 0.3);
+        }
+        h2 {
+          position: relative;
+        }
+        h2::before {
+          content: '🌿';
+          margin-right: 8px;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Initialize forest particles and cursor trail
+      createForestParticles();
+      createCursorTrail();
+
+      // Smooth page load animation
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 1s ease';
+      setTimeout(() => {
+        document.body.style.opacity = '1';
+      }, 100);
+
+      // Enhanced keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const overlay = document.querySelector('div[style*="position: fixed"][style*="z-index: 10000"]');
+          if (overlay) overlay.click();
+        }
+        if (e.ctrlKey && e.key === 'k') {
+          e.preventDefault();
+          window.location.href = 'index.html#htb';
+        }
+        if (e.key === 'f' && !e.ctrlKey) {
+          e.preventDefault();
+          const firstImage = document.querySelector('.screenshot');
+          if (firstImage) firstImage.click();
+        }
+      });
+
+      // Add floating action button for quick navigation
+      const fab = document.createElement('div');
+      fab.innerHTML = '🌲';
+      fab.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), #10b981);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 8px 25px rgba(56, 178, 172, 0.4);
+        transition: all 0.3s ease;
+      `;
+      
+      fab.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      
+      fab.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.1) rotate(15deg)';
+        this.style.boxShadow = '0 12px 35px rgba(56, 178, 172, 0.6)';
+      });
+      
+      fab.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1) rotate(0deg)';
+        this.style.boxShadow = '0 8px 25px rgba(56, 178, 172, 0.4)';
+      });
+      
+      document.body.appendChild(fab);
+      
+      // Show/hide FAB based on scroll position
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          fab.style.opacity = '1';
+          fab.style.transform = 'scale(1)';
+        } else {
+          fab.style.opacity = '0';
+          fab.style.transform = 'scale(0.8)';
+        }
+      });
+      
+      // Initially hide FAB
+      fab.style.opacity = '0';
+      fab.style.transform = 'scale(0.8)';
+    });
   </script>
 </body>
 </html>
