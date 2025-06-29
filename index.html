@@ -50,13 +50,26 @@
       position: relative;
     }
 
+    body.light header {
+      background: linear-gradient(to right, #e2e8f0, #cbd5e0, #a0aec0);
+    }
+
     header h1 {
       font-size: 3rem;
+      color: #ffffff;
+    }
+
+    body.light header h1 {
+      color: #1a202c;
     }
 
     header p {
       font-size: 1.2rem;
-      color: var(--footer);
+      color: #cbd5e0;
+    }
+
+    body.light header p {
+      color: #4a5568;
     }
 
     nav {
@@ -190,30 +203,30 @@
     <h2>Hack The Box Writeups</h2>
     <div class="grid">
       <div class="card" onclick="window.location.href='lame.htb.html'">lame.htb</div>
-      <div class="card">forest.htb</div>
-      <div class="card">sizzle.htb</div>
-      <div class="card">sauna.htb</div>
-      <div class="card">active.htb</div>
-      <div class="card">blackfield.htb</div>
-      <div class="card">resolute.htb</div>
-      <div class="card">reel.htb</div>
-      <div class="card">cascade.htb</div>
-      <div class="card">multimaster.htb</div>
-      <div class="card">swagshop.htb</div>
-      <div class="card">help.htb</div>
-      <div class="card">mantis.htb</div>
+      <div class="card" onclick="window.location.href='forest.htb.html'">forest.htb</div>
+      <div class="card" onclick="window.location.href='sizzle.htb.html'">sizzle.htb</div>
+      <div class="card" onclick="window.location.href='sauna.htb.html'">sauna.htb</div>
+      <div class="card" onclick="window.location.href='active.htb.html'">active.htb</div>
+      <div class="card" onclick="window.location.href='blackfield.htb.html'">blackfield.htb</div>
+      <div class="card" onclick="window.location.href='resolute.htb.html'">resolute.htb</div>
+      <div class="card" onclick="window.location.href='reel.htb.html'">reel.htb</div>
+      <div class="card" onclick="window.location.href='cascade.htb.html'">cascade.htb</div>
+      <div class="card" onclick="window.location.href='multimaster.htb.html'">multimaster.htb</div>
+      <div class="card" onclick="window.location.href='swagshop.htb.html'">swagshop.htb</div>
+      <div class="card" onclick="window.location.href='help.htb.html'">help.htb</div>
+      <div class="card" onclick="window.location.href='mantis.htb.html'">mantis.htb</div>
     </div>
   </section>
 
   <section id="ctf">
     <h2>Useful CTF Links</h2>
     <div class="grid">
-      <div class="card">nmapAutomator</div>
-      <div class="card">LppSec</div>
-      <div class="card">KTT's Command Library</div>
-      <div class="card">threader3000</div>
-      <div class="card">EoL Python Versions</div>
-      <div class="card">reshells</div>
+      <div class="card" onclick="window.open('https://github.com/21y4d/nmapAutomator', '_blank')">nmapAutomator</div>
+      <div class="card" onclick="window.open('https://ippsec.rocks/?#', '_blank')">IPPSEC</div>
+      <div class="card" onclick="window.location.href='KTTCommandLibrary.html'">KTT's Command Library</div>
+      <div class="card" onclick="window.open('https://github.com/dievus/threader3000', '_blank')">threader3000</div>
+      <div class="card" onclick="window.location.href='eol-python-versions.html'">EoL Python Versions</div>
+      <div class="card" onclick="window.open('https://www.revshells.com', '_blank')">revshells</div>
     </div>
   </section>
 
@@ -257,14 +270,29 @@
         return;
       }
       
-      // Get all text content elements to search through
-      const searchableElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, span, div');
+      // Get all text content elements to search through, but exclude interactive elements
+      const searchableElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, span:not(.card span), div:not(.card)');
       let foundResults = 0;
+      
+      // Also search card text content but handle them specially
+      const cards = document.querySelectorAll('.card');
       
       searchableElements.forEach(element => {
         const text = element.textContent.toLowerCase();
-        if (text.includes(searchTerm) && !element.classList.contains('search-highlight')) {
+        if (text.includes(searchTerm) && !element.classList.contains('search-highlight') && !hasInteractiveParent(element)) {
           highlightText(element, searchTerm);
+          foundResults++;
+        }
+      });
+      
+      // Handle card searches specially to preserve functionality
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          // Add a visual indicator without breaking the onclick
+          card.style.border = '2px solid #ffeb3b';
+          card.style.boxShadow = '0 0 10px rgba(255, 235, 59, 0.5)';
+          card.setAttribute('data-search-match', 'true');
           foundResults++;
         }
       });
@@ -275,13 +303,31 @@
       // Scroll to first result if found
       if (foundResults > 0) {
         const firstHighlight = document.querySelector('.search-highlight');
-        if (firstHighlight) {
-          firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const firstCard = document.querySelector('.card[data-search-match="true"]');
+        const firstResult = firstHighlight || firstCard;
+        if (firstResult) {
+          firstResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
     }
     
+    function hasInteractiveParent(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        if (parent.classList.contains('card') || parent.onclick || parent.getAttribute('onclick')) {
+          return true;
+        }
+        parent = parent.parentElement;
+      }
+      return false;
+    }
+    
     function highlightText(element, searchTerm) {
+      // Only highlight if element doesn't have interactive children or parents
+      if (element.querySelector('.card') || hasInteractiveParent(element)) {
+        return;
+      }
+      
       const text = element.innerHTML;
       const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
       const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
@@ -294,6 +340,14 @@
         const parent = highlight.parentNode;
         parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
         parent.normalize();
+      });
+      
+      // Clear card search styling
+      const searchCards = document.querySelectorAll('.card[data-search-match="true"]');
+      searchCards.forEach(card => {
+        card.style.border = '';
+        card.style.boxShadow = '';
+        card.removeAttribute('data-search-match');
       });
       
       // Remove search feedback
